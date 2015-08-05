@@ -23,9 +23,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
 
-/**
- * Created by Admin on 8/5/2015.
- */
+
 public class ServerActivity extends Activity {
 
     private TextView serverStatus;
@@ -52,7 +50,7 @@ public class ServerActivity extends Activity {
 
     public void init() {
         serverStatus = (TextView) findViewById(R.id.serverstatus);
-        magicPad = (View) findViewById(R.id.magicpad);
+        magicPad = findViewById(R.id.magicpad);
         magicPad.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -78,11 +76,11 @@ public class ServerActivity extends Activity {
 
         Thread fst = new Thread(new ServerThread());
         fst.start();
-        Log.d("hello","dd");
+        Log.d("hello","ds");
     }
 
     public void sendCommand(String command) {
-        if (client.isConnected() == true) {
+        if (client.isConnected()) {
             try {
 
                 PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client
@@ -91,7 +89,7 @@ public class ServerActivity extends Activity {
                 out.println(command);
 
             } catch (Exception e) {
-
+                Log.e("hello",e.toString());
             }
         }
     }
