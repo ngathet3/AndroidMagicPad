@@ -6,7 +6,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
@@ -14,6 +16,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -26,7 +30,11 @@ import java.util.Enumeration;
 
 public class ServerActivity extends Activity {
 
+    float startX = 0.0f;
+    float startY = 0.0f;
     private TextView serverStatus;
+    private Button btnRightClick;
+    private Button btnLeftClick;
     private View magicPad;
 
     Socket client;
@@ -37,7 +45,7 @@ public class ServerActivity extends Activity {
     public static final int SERVERPORT = 8080;
 
     private Handler handler = new Handler();
-
+    // Server Socket
     private ServerSocket serverSocket;
 
 
@@ -50,22 +58,56 @@ public class ServerActivity extends Activity {
 
     public void init() {
         serverStatus = (TextView) findViewById(R.id.serverstatus);
+        btnLeftClick = (Button) findViewById(R.id.btnLeftClick);
+        btnLeftClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendObject(new Point("l_click", 0.0f, 0.0f));
+            }
+        });
+        btnRightClick = (Button) findViewById(R.id.btnRightClick);
+        btnRightClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendObject(new Point("r_click", 0.0f, 0.0f));
+
+            }
+        });
         magicPad = findViewById(R.id.magicpad);
         magicPad.setOnTouchListener(new View.OnTouchListener() {
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+
+
+
                 int pointerindex = event.getActionIndex();
                 int pointerid = event.getPointerId(pointerindex);
                 int maskedAction = event.getActionMasked();
 
                 switch (maskedAction) {
                     case MotionEvent.ACTION_POINTER_UP:
-                        sendCommand("r_click");
 
                         break;
                     case MotionEvent.ACTION_UP:
-                        sendCommand("l_click");
+
                         break;
+                    case MotionEvent.ACTION_DOWN:
+                        startX = event.getX();
+                        startY = event.getY();
+                        Log.d("down",String.valueOf(event.getX()));
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+
+                        float diffX = getTotalMoveX(startX, event.getX());
+                        float diffY = getTotalMoveY(startY, event.getY());
+                        Log.d("different",String.valueOf(startX));
+                        sendObject(new Point("m_move", diffX, diffY));
+
+                        break;
+
+
                 }
                 return true;
 
@@ -76,21 +118,43 @@ public class ServerActivity extends Activity {
 
         Thread fst = new Thread(new ServerThread());
         fst.start();
-        Log.d("hello","ds");
+        Log.d("hello", "ds");
     }
 
-    public void sendCommand(String command) {
+    public int getTotalMoveX(float startpoint_x, float movepoint_x) {
+        int diff_X = 0;
+        if (movepoint_x < startpoint_x) {
+            diff_X = (Integer) (Math.round(startpoint_x - movepoint_x));
+        } else if (movepoint_x > startpoint_x) {
+            diff_X = (Integer) (Math.round(movepoint_x - startpoint_x));
+            Log.d("here",String.valueOf(diff_X));
+        }
+        return diff_X;
+    }
+
+    public int getTotalMoveY(float startpoint_y, float movepoint_y) {
+        int diff_Y = 0;
+        if (movepoint_y < startpoint_y) {
+            diff_Y = (Integer) (Math.round(startpoint_y - movepoint_y));
+        } else if (movepoint_y > startpoint_y) {
+            diff_Y = (Integer) (Math.round(movepoint_y - startpoint_y));
+        }
+        return diff_Y;
+    }
+
+    public void sendObject(Object obj) {
         if (client.isConnected()) {
+            OutputStream os = null;
             try {
+                os = client.getOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(os);
 
-                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client
-                        .getOutputStream())), true);
-                // where you issue the commands
-                out.println(command);
+                oos.writeObject(obj);
 
-            } catch (Exception e) {
-                Log.e("hello",e.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
         }
     }
 

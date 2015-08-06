@@ -13,5 +13,28 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/magicpad"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Left Click"
+            android:id="@+id/btnLeftClick"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Right Click"
+            android:id="@+id/btnRightClick"
+            android:layout_weight="1" />
+    </LinearLayout>
+
 </LinearLayout>
