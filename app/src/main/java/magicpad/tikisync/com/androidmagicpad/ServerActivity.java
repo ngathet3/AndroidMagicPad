@@ -32,6 +32,9 @@ public class ServerActivity extends Activity {
 
     float startX = 0.0f;
     float startY = 0.0f;
+    String moveType_X=null;
+    String moveType_Y=null;
+
     private TextView serverStatus;
     private Button btnRightClick;
     private Button btnLeftClick;
@@ -62,14 +65,14 @@ public class ServerActivity extends Activity {
         btnLeftClick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendObject(new Point("l_click", 0.0f, 0.0f));
+                sendObject(new CommandSet("l_click", 0.0f, 0.0f,null,null));
             }
         });
         btnRightClick = (Button) findViewById(R.id.btnRightClick);
         btnRightClick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendObject(new Point("r_click", 0.0f, 0.0f));
+                sendObject(new CommandSet("r_click", 0.0f, 0.0f,null,null));
 
             }
         });
@@ -92,20 +95,20 @@ public class ServerActivity extends Activity {
                         break;
                     case MotionEvent.ACTION_UP:
 
-                        break;
+                      break;
                     case MotionEvent.ACTION_DOWN:
                         startX = event.getX();
                         startY = event.getY();
                         Log.d("down",String.valueOf(event.getX()));
-                        break;
+                       break;
                     case MotionEvent.ACTION_MOVE:
 
                         float diffX = getTotalMoveX(startX, event.getX());
                         float diffY = getTotalMoveY(startY, event.getY());
                         Log.d("different",String.valueOf(startX));
-                        sendObject(new Point("m_move", diffX, diffY));
+                        sendObject(new CommandSet("m_move", diffX, diffY,moveType_X,moveType_Y));
+                      break;
 
-                        break;
 
 
                 }
@@ -125,8 +128,10 @@ public class ServerActivity extends Activity {
         int diff_X = 0;
         if (movepoint_x < startpoint_x) {
             diff_X = (Integer) (Math.round(startpoint_x - movepoint_x));
+            moveType_X="TO_LEFT";
         } else if (movepoint_x > startpoint_x) {
             diff_X = (Integer) (Math.round(movepoint_x - startpoint_x));
+            moveType_X="TO_RIGHT";
             Log.d("here",String.valueOf(diff_X));
         }
         return diff_X;
@@ -136,8 +141,10 @@ public class ServerActivity extends Activity {
         int diff_Y = 0;
         if (movepoint_y < startpoint_y) {
             diff_Y = (Integer) (Math.round(startpoint_y - movepoint_y));
+            moveType_Y="TO_UP";
         } else if (movepoint_y > startpoint_y) {
             diff_Y = (Integer) (Math.round(movepoint_y - startpoint_y));
+            moveType_Y="TO_DOWN";
         }
         return diff_Y;
     }
